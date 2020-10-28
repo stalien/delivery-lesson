@@ -1,1 +1,2 @@
-# delivery-lesson-1
+# delivery-lesson-day1
+# delivery-lesson-day2
