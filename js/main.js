@@ -1,5 +1,7 @@
 'use strict';
 
+const RED_COLOR = 'red'
+
 const cartButton = document.querySelector("#cart-button");
 const modal = document.querySelector(".modal");
 const close = document.querySelector(".close");
@@ -21,10 +23,13 @@ const cardsMenu = document.querySelector('.cards-menu');
 
 let login = localStorage.getItem('gloDelivery');
 
-//console.log(modalAuth);
+function validName (str) {
+  const regName = /^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$/;
+  return regName.test(str);
+};
 
 function toggleModal() {
-  modalAuth.classList.toggle("is-open");
+  modal.classList.toggle("is-open");
 }
 
 function toggleModalAuth() {
@@ -66,19 +71,20 @@ function notAuthorized() {
   function logIn(event) {
     event.preventDefault();
 
-    if (loginInput.value.trim()) {
+    if (validName(loginInput.value)) {
       login = loginInput.value;
       localStorage.setItem('gloDelivery', login);
 
       toggleModalAuth();
+
       buttonAuth.removeEventListener('click', toggleModalAuth);
       closeAuth.removeEventListener('click', toggleModalAuth);
       logInForm.removeEventListener('submit', logIn);
       loginForm.reset();
       checkAuth();
     } else {
-      loginInput.style.borderColor = 'red';
-      alert('Введите логин');
+      loginInput.style.borderColor = RED_COLOR;
+      alert('Введите верный логин');
     }
   }
 
@@ -168,8 +174,10 @@ function openGoods(event) {
     cardsMenu.textContent = '';
 
     createCardGood();
+
   } else {
-    modalAuth.classList.toggle("is-open");
+    toggleModalAuth();
+    //modalAuth.classList.toggle("is-open");
   }
 
   
@@ -195,3 +203,15 @@ logo.addEventListener('click', closeGoods);
 checkAuth();
 
 createCardRestaurant();
+
+// Slider
+
+const swiper = new Swiper('.swiper-container', {
+  slidesPerView: 1,
+  loop: true,
+  autoprlay: true,
+  effect: 'cube',
+  cubeEffect:{
+    shadow:false,
+  },
+});
