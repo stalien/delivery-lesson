@@ -19,6 +19,13 @@ const restaurants = document.querySelector('.restaurants');
 const menu = document.querySelector('.menu');
 const logo = document.querySelector('.logo');
 const cardsMenu = document.querySelector('.cards-menu');
+const restaurantTitle = document.querySelector('.restaurant-title');
+const restauranRating = document.querySelector('.rating');
+const restaurantPrice = document.querySelector('.price');
+const restaurantCategory = document.querySelector('.category');
+const inputSearch = document.querySelector('.input-search');
+
+
 
 
 let login = localStorage.getItem('gloDelivery');
@@ -120,19 +127,20 @@ function checkAuth() {
   }
 }
 
-function createCardRestaurant(restaurant) {
-
-  const { image, 
-          kitchen, 
-          name, 
-          price,
-          stars,
-          products,
-          time_of_delivery: timeOfDelivery
-         } = restaurant;
+function createCardRestaurant({ image, 
+  kitchen, 
+  name, 
+  price,
+  stars,
+  products,
+  time_of_delivery: timeOfDelivery }) {
+  
+    const cardRestaurant = document.createElement('a');
+    cardRestaurant.className = 'card card-restaurant';
+    cardRestaurant.products = products;
+    cardRestaurant.info = { kitchen, name, price, stars };
 
     const card = `
-    <a class="card card-restaurant" data-products="${products}">
     <img src="${image}" alt="image" class="card-image"/>
     <div class="card-text">
       <div class="card-heading">
@@ -147,10 +155,10 @@ function createCardRestaurant(restaurant) {
         <div class="category">${kitchen}</div>
       </div>
     </div>
-    </a>
     `;
 
-    cardsRestaurants.insertAdjacentHTML('beforeend', card);
+    cardRestaurant.insertAdjacentHTML('beforeend', card);
+    cardsRestaurants.insertAdjacentElement('beforeend', cardRestaurant);
 
 }
 
@@ -194,8 +202,15 @@ function openGoods(event) {
     containerPromo.classList.add('hide');
     restaurants.classList.add('hide');
     menu.classList.remove('hide');
+
+    const { name, kitchen, price, stars } = restaurant.info;
+
+    restaurantTitle.textContent = name;
+    restauranRating.textContent = stars;
+    restaurantPrice.textContent = `От ${price} ₽`;
+    restaurantCategory.textContent = kitchen;
     
-    getData(`./db/${restaurant.dataset.products}`)
+    getData(`./db/${restaurant.products}`)
      .then(function(data) {
       data.forEach(createCardGood);
     });
@@ -234,12 +249,52 @@ logo.addEventListener('click', closeGoods);
 
 checkAuth();
 
+inputSearch.addEventListener('keypress', function(event) {
+  if (event.charCode === 13) {
+    const value = event.target.value.trim();
+
+    if (!value) {
+      return;
+    }
+    
+     getData('./db/partners.json')
+      .then(function (data) {
+        return data.map(function (partner) {
+         return partner.products;
+        });
+      })
+      .then(function (linksProduct) {
+          cardsMenu.textContent = '';
+          linksProduct.forEach(function (link) {
+            getData(`./db/${link}`)
+              .then(function (data) {       
+                const resultSearch = data.filter(function (item) {
+                  const name = item.name.toLowerCase();
+                  return name.includes(value.toLowerCase());
+                })
+                
+                containerPromo.classList.add('hide');
+                restaurants.classList.add('hide');
+                menu.classList.remove('hide');
+                
+                restaurantTitle.textContent = `Результат поиска по запросу "${value}"`;
+                restauranRating.textContent = '';
+                restaurantPrice.textContent = '';
+                restaurantCategory.textContent = '';
+                resultSearch.forEach(createCardGood);
+              })
+          })
+        console.log(linksProduct);
+      })
+  }
+});
+
 // Slider
 
 const swiper = new Swiper('.swiper-container', {
   slidesPerView: 1,
   loop: true,
-  autoprlay: true,
+  autoplay: true,
   effect: 'cube',
   cubeEffect:{
     shadow:false,
